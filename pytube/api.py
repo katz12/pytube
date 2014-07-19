@@ -234,18 +234,22 @@ class YouTube(object):
             video_urls = stream_map["url"]
             #Get the video signatures, YouTube require them as an url component
             video_signatures = stream_map["sig"]
+            use_sig = data['use_cipher_signature'][0] is 'True'
             self.title = self._fetch(('title',), content)
 
             for idx in range(len(video_urls)):
                 url = video_urls[idx]
-                signature = video_signatures[idx]
+                
+                #Add video signature to url
+                if use_sig:
+                    signature = video_signatures[idx]
+                    url = "%s&signature=%s" % (url, signature)
+
                 try:
                     fmt, data = self._extract_fmt(url)
                 except (TypeError, KeyError):
                     pass
                 else:
-                    #Add video signature to url
-                    url = "%s&signature=%s" % (url, signature)
                     v = Video(url, self.filename, **data)
                     self.videos.append(v)
                     self._fmt_values.append(fmt)
